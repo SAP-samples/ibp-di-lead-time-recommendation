@@ -10,8 +10,8 @@ If not stated otherwise, manual steps are to be done in the SAP Data Intelligenc
 2. Create a Python 3 Custom Operator which writes the key figure values to the IBP system. Copy the script and schema files from the folder python3Operator
 3. Create docker files. Copy the files from the dockerfiles folder
 4. Create an ML Scenario, for example with the name Lead Time Prediction
-5. Within the ML Scenario start the creation of a first Jupyter Notebook. From within Jupyter Labs import the files from folder notebooks
-6. Create Piplines
+5. Within the ML Scenario start the creation of a first Jupyter Notebook. From within Jupyter Labs import the files from the notebooks folder under the dsp folder
+6. Create three Piplines, one by one. Copy the json files from the pipilines folder under the dsp folder
 
 ## Known Issues
 
