@@ -5,12 +5,13 @@
 ## Requirements: User licenses for and experience with SAP Data Intelligence and SAP Integrated Business Planning
 
 ## Download and Installation: 
-If not stated otherwise, manual editing is done in the SAP Data Intelligence system.
+If not stated otherwise, manual steps are to be done in the SAP Data Intelligence system.
 1. Create an OData connection to your IBP system. Copy the example json file from the connections folder
 2. Create a Python 3 Custom Operator which writes the key figure values to the IBP system. Copy the script and schema files from the folder python3Operator
 3. Create docker files. Copy the files from the dockerfiles folder
-4. Create an ML Scenario: 
-5. kkkk
+4. Create an ML Scenario. Copy the meta data from the dsp folder
+5. Create Jupyter Notebooks
+6. Create Piplines
 
 ## Known Issues
 
