@@ -1,0 +1,508 @@
+{
+    "properties": {},
+    "description": "IBP LT Prediction",
+    "processes": {
+        "artifactconsumer1": {
+            "component": "com.sap.ml.artifact.consumer.v2",
+            "metadata": {
+                "label": "Artifact Consumer",
+                "x": 385.9999990463257,
+                "y": 60,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "subengines": [
+                    "main"
+                ],
+                "config": {}
+            }
+        },
+        "artifactproducer1": {
+            "component": "com.sap.ml.artifact.producer.v2",
+            "metadata": {
+                "label": "Artifact Producer",
+                "x": 1606.9999923706055,
+                "y": 126.00000023841858,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "artifactName": "predictedData"
+                }
+            }
+        },
+        "jupyter1": {
+            "component": "com.sap.jupyter",
+            "metadata": {
+                "label": "Jupyter",
+                "x": 1253.9999952316284,
+                "y": 121,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "ui": "dynpath",
+                "subengines": [
+                    "com.sap.python36"
+                ],
+                "config": {
+                    "notebookFilePath": "predictor",
+                    "productive": true
+                },
+                "additionalinports": [
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "days",
+                        "type": "string"
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "blob"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "prediction",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "artifactconsumer2": {
+            "component": "com.sap.ml.artifact.consumer.v2",
+            "metadata": {
+                "label": "Artifact Consumer",
+                "x": 385.9999990463257,
+                "y": 220,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "subengines": [
+                    "main"
+                ],
+                "config": {}
+            }
+        },
+        "readfile1": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read File",
+                "x": 759.9999980926514,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "tofile1": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 590.9999980926514,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "toblobconverter1": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 944.999997138977,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "constantgenerator1": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Constant Generator",
+                "x": 12,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "content": "{\"artifact\": {\"id\": \"${ARTIFACT:MODEL}\"}}"
+                }
+            }
+        },
+        "tomessageconverter1": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 181,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "writefile1": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "x": 1867.9999904632568,
+                "y": 58.00000023841858,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "graphterminator1": {
+            "component": "com.sap.util.graphTerminator",
+            "metadata": {
+                "label": "Graph Terminator",
+                "x": 1867.9999904632568,
+                "y": 178.00000023841858,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "constantgenerator2": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Constant Generator",
+                "x": 944.999997138977,
+                "y": 132,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "content": "${DaysToPredict}"
+                }
+            }
+        },
+        "constantgenerator3": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Constant Generator",
+                "x": 12,
+                "y": 192,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "content": "{\"artifact\": {\"id\": \"${ARTIFACT:METADATA}\"}}"
+                }
+            }
+        },
+        "tomessageconverter2": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 181,
+                "y": 192,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "readfile2": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read File",
+                "x": 759.9999980926514,
+                "y": 192,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "tofile2": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 590.9999980926514,
+                "y": 192,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "toblobconverter2": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 944.999997138977,
+                "y": 252,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        }
+    },
+    "groups": [
+        {
+            "name": "group2",
+            "nodes": [
+                "artifactconsumer1"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        },
+        {
+            "name": "group3",
+            "nodes": [
+                "artifactproducer1"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        },
+        {
+            "name": "group4",
+            "nodes": [
+                "jupyter1"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "catboost": ""
+            }
+        },
+        {
+            "name": "group1",
+            "nodes": [
+                "artifactconsumer2"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        }
+    ],
+    "connections": [
+        {
+            "metadata": {
+                "points": "509.9999990463257,100 557.9999985694885,100 557.9999985694885,112 585.9999980926514,112"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactconsumer1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "714.9999980926514,112 754.9999980926514,112"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile1"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1068.999997138977,52 1112.99999666214,52 1112.99999666214,169 1188.9999957084656,169 1188.9999957084656,135 1248.9999952316284,135"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter1"
+            },
+            "tgt": {
+                "port": "model",
+                "process": "jupyter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "883.9999980926514,112 911.9999976158142,112 911.9999976158142,52 939.999997138977,52"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile1"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "305,112 332.99999952316284,112 332.99999952316284,100 380.9999990463257,100"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter1"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactconsumer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "136,112 176,112"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator1"
+            },
+            "tgt": {
+                "port": "instring",
+                "process": "tomessageconverter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1377.9999952316284,171 1405.9999947547913,171 1405.9999947547913,180 1481.999993801117,180 1481.999993801117,160.50000023841858 1573.9999928474426,160.50000023841858 1573.9999928474426,157.00000023841858 1601.9999923706055,157.00000023841858"
+            },
+            "src": {
+                "port": "prediction",
+                "process": "jupyter1"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1991.9999904632568,98.00000023841858 2019.9999899864197,98.00000023841858 2019.9999899864197,285.9999997615814 1834.999990940094,285.9999997615814 1834.999990940094,245.99999976158142 1497.999993801117,245.99999976158142 1497.999993801117,171.50000023841858 1573.9999928474426,171.50000023841858 1573.9999928474426,175.00000023841858 1601.9999923706055,175.00000023841858"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile1"
+            },
+            "tgt": {
+                "port": "inFileReturn",
+                "process": "artifactproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1730.9999923706055,157.00000023841858 1758.9999918937683,157.00000023841858 1758.9999918937683,160.50000023841858 1834.999990940094,160.50000023841858 1834.999990940094,98.00000023841858 1862.9999904632568,98.00000023841858"
+            },
+            "src": {
+                "port": "outFileSend",
+                "process": "artifactproducer1"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1730.9999923706055,175.00000023841858 1758.9999918937683,175.00000023841858 1758.9999918937683,171.50000023841858 1834.999990940094,171.50000023841858 1834.999990940094,218.00000023841858 1862.9999904632568,218.00000023841858"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactproducer1"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "graphterminator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1068.999997138977,172 1096.99999666214,172 1096.99999666214,180 1204.9999957084656,180 1204.9999957084656,153 1248.9999952316284,153"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator2"
+            },
+            "tgt": {
+                "port": "days",
+                "process": "jupyter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "136,232 176,232"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator3"
+            },
+            "tgt": {
+                "port": "instring",
+                "process": "tomessageconverter2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "305,232 332.99999952316284,232 332.99999952316284,260 380.9999990463257,260"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter2"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactconsumer2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "509.9999990463257,260 557.9999985694885,260 557.9999985694885,232 585.9999980926514,232"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactconsumer2"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "714.9999980926514,232 754.9999980926514,232"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile2"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1068.999997138977,292 1096.99999666214,292 1096.99999666214,191 1220.9999957084656,191 1220.9999957084656,171 1248.9999952316284,171"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter2"
+            },
+            "tgt": {
+                "port": "metadata",
+                "process": "jupyter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "883.9999980926514,232 911.9999976158142,232 911.9999976158142,292 939.999997138977,292"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile2"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter2"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {}
+}

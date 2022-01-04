@@ -1,0 +1,579 @@
+{
+    "properties": {},
+    "description": "IBP LT Training",
+    "processes": {
+        "submitmetrics1": {
+            "component": "com.sap.ml.submitMetrics",
+            "metadata": {
+                "label": "Submit Metrics",
+                "x": 1322.999994277954,
+                "y": 40,
+                "height": 80,
+                "width": 120,
+                "extensible": false,
+                "subengines": [
+                    "com.sap.python36"
+                ],
+                "config": {}
+            }
+        },
+        "artifactproducer1": {
+            "component": "com.sap.ml.artifact.producer.v2",
+            "metadata": {
+                "label": "Artifact Producer",
+                "x": 1322.999994277954,
+                "y": 375.9999990463257,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "subengines": [
+                    "main"
+                ],
+                "config": {
+                    "artifactKind": "model",
+                    "artifactName": "trainedModel"
+                }
+            }
+        },
+        "artifactproducer2": {
+            "component": "com.sap.ml.artifact.producer.v2",
+            "metadata": {
+                "label": "Artifact Producer",
+                "x": 1322.999994277954,
+                "y": 200,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "subengines": [
+                    "main"
+                ],
+                "config": {
+                    "artifactName": "${testSetName}"
+                }
+            }
+        },
+        "jupyter2": {
+            "component": "com.sap.jupyter",
+            "metadata": {
+                "label": "Jupyter",
+                "x": 784.9999980926514,
+                "y": 221.99999928474426,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "ui": "dynpath",
+                "subengines": [
+                    "com.sap.python36"
+                ],
+                "config": {
+                    "notebookFilePath": "AIModel",
+                    "productive": true
+                },
+                "additionalinports": [
+                    {
+                        "name": "in",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "out",
+                        "type": "string"
+                    },
+                    {
+                        "name": "modelOut",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "testOut",
+                        "type": "blob"
+                    }
+                ]
+            }
+        },
+        "jupyter1": {
+            "component": "com.sap.jupyter",
+            "metadata": {
+                "label": "Jupyter",
+                "x": 575.9999980926514,
+                "y": 221.99999928474426,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "ui": "dynpath",
+                "subengines": [
+                    "com.sap.python36"
+                ],
+                "config": {
+                    "notebookFilePath": "dataProcessor",
+                    "productive": true
+                },
+                "additionalinports": [
+                    {
+                        "name": "in",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "out",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "python3operator1": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 370.9999990463257,
+                "y": 213.99999928474426,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "import pandas as pd\n\ndef on_data_in(data):\n    dataframe = pd.DataFrame(data.body)\n    api.send(\"out\", str(dataframe.to_json()))\n\napi.set_port_callback('input1',on_data_in)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "input1",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "out",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "tomessageconverter1": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 1096.4999961853027,
+                "y": 70.99999976158142,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        },
+        "graphterminator1": {
+            "component": "com.sap.util.graphTerminator",
+            "metadata": {
+                "label": "Graph Terminator",
+                "x": 1816.9999914169312,
+                "y": 213.99999928474426,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "python3operator2": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 1631.9999923706055,
+                "y": 139.99999952316284,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "def on_inputs_ready(metrics_resp, artifact_id, test_in):\n    # both input ports have data - previous operators have completed. Send a message as output to stop the graph\n    api.send(\"output\", \"done\")\n\napi.set_port_callback([\"metricsResponse\", \"artifactId\", \"testIn\"], on_inputs_ready)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "metricsResponse",
+                        "type": "message"
+                    },
+                    {
+                        "name": "artifactId",
+                        "type": "message"
+                    },
+                    {
+                        "name": "testIn",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "output",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "writefile1": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "x": 1631.9999923706055,
+                "y": 259.99999952316284,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "writefile2": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "x": 1061.9999961853027,
+                "y": 250.99999976158142,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "tomessageconverter2": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 1096.4999961853027,
+                "y": 386.9999988079071,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        },
+        "tomessageconverter3": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 1096.4999961853027,
+                "y": 160.99999976158142,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        },
+        "constantgenerator1": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Constant Generator",
+                "x": 17,
+                "y": 213.99999928474426,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "content": "select prdid,locid locto,locfr locid,iotime,rotime,CAST(qty AS float) qty,CAST(lt AS float) lt from sapemp.trans2"
+                }
+            }
+        },
+        "saphanaclient1": {
+            "component": "com.sap.hana.client2",
+            "metadata": {
+                "label": "SAP HANA Client",
+                "x": 201.99999904632568,
+                "y": 213.99999928474426,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "Configuration Manager",
+                        "connectionID": "HANA4IBP"
+                    }
+                }
+            }
+        }
+    },
+    "groups": [
+        {
+            "name": "group3",
+            "nodes": [
+                "submitmetrics1"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        },
+        {
+            "name": "group1",
+            "nodes": [
+                "artifactproducer1"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        },
+        {
+            "name": "group2",
+            "nodes": [
+                "artifactproducer2"
+            ],
+            "metadata": {
+                "description": "Group"
+            }
+        },
+        {
+            "name": "group4",
+            "nodes": [
+                "jupyter2"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "catboost": "",
+                "sklearn": "",
+                "mathplotlib": "3.2",
+                "seaborn": ""
+            }
+        },
+        {
+            "name": "group5",
+            "nodes": [
+                "jupyter1"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "seaborn": ""
+            }
+        }
+    ],
+    "connections": [
+        {
+            "metadata": {
+                "points": "908.9999980926514,243.99999928474426 936.9999976158142,243.99999928474426 936.9999976158142,250.99999928474426 1012.9999966621399,250.99999928474426 1012.9999966621399,86.99999976158142 1091.4999961853027,86.99999976158142"
+            },
+            "src": {
+                "port": "out",
+                "process": "jupyter2"
+            },
+            "tgt": {
+                "port": "inbody",
+                "process": "tomessageconverter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1150.4999961853027,95.99999976158142 1213.9999957084656,95.99999976158142 1213.9999957084656,80 1317.999994277954,80"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter1"
+            },
+            "tgt": {
+                "port": "metrics",
+                "process": "submitmetrics1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1755.9999923706055,179.99999952316284 1783.9999918937683,179.99999952316284 1783.9999918937683,253.99999928474426 1811.9999914169312,253.99999928474426"
+            },
+            "src": {
+                "port": "output",
+                "process": "python3operator2"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "graphterminator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1446.999994277954,80 1550.9999928474426,80 1550.9999928474426,161.99999952316284 1626.9999923706055,161.99999952316284"
+            },
+            "src": {
+                "port": "response",
+                "process": "submitmetrics1"
+            },
+            "tgt": {
+                "port": "metricsResponse",
+                "process": "python3operator2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1446.999994277954,433.9999990463257 1474.999993801117,433.9999990463257 1474.999993801117,421.4999990463257 1582.9999928474426,421.4999990463257 1582.9999928474426,299.99999952316284 1626.9999923706055,299.99999952316284"
+            },
+            "src": {
+                "port": "outFileSend",
+                "process": "artifactproducer1"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1755.9999923706055,290.99999952316284 1783.9999918937683,290.99999952316284 1783.9999918937683,367.9999990463257 1598.9999928474426,367.9999990463257 1598.9999928474426,495.9999985694885 1213.9999957084656,495.9999985694885 1213.9999957084656,421.4999990463257 1289.9999947547913,421.4999990463257 1289.9999947547913,424.9999990463257 1317.999994277954,424.9999990463257"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile1"
+            },
+            "tgt": {
+                "port": "inFileReturn",
+                "process": "artifactproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1446.999994277954,397.9999990463257 1474.999993801117,397.9999990463257 1474.999993801117,410.4999990463257 1566.9999928474426,410.4999990463257 1566.9999928474426,179.99999952316284 1626.9999923706055,179.99999952316284"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactproducer1"
+            },
+            "tgt": {
+                "port": "artifactId",
+                "process": "python3operator2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "699.9999980926514,261.99999928474426 779.9999980926514,261.99999928474426"
+            },
+            "src": {
+                "port": "out",
+                "process": "jupyter1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "jupyter2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1446.999994277954,258 1474.999993801117,258 1474.999993801117,245.5 1550.9999928474426,245.5 1550.9999928474426,319.99999952316284 1213.9999957084656,319.99999952316284 1213.9999957084656,358.99999928474426 1028.99999666214,358.99999928474426 1028.99999666214,290.9999997615814 1056.9999961853027,290.9999997615814"
+            },
+            "src": {
+                "port": "outFileSend",
+                "process": "artifactproducer2"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1185.9999961853027,281.9999997615814 1213.9999957084656,281.9999997615814 1213.9999957084656,245.5 1289.9999947547913,245.5 1289.9999947547913,249 1317.999994277954,249"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile2"
+            },
+            "tgt": {
+                "port": "inFileReturn",
+                "process": "artifactproducer2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1446.999994277954,222 1474.999993801117,222 1474.999993801117,234.5 1582.9999928474426,234.5 1582.9999928474426,197.99999952316284 1626.9999923706055,197.99999952316284"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactproducer2"
+            },
+            "tgt": {
+                "port": "testIn",
+                "process": "python3operator2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1150.4999961853027,411.9999988079071 1213.9999957084656,411.9999988079071 1213.9999957084656,410.4999990463257 1289.9999947547913,410.4999990463257 1289.9999947547913,406.9999990463257 1317.999994277954,406.9999990463257"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter2"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "908.9999980926514,261.99999928474426 1012.9999966621399,261.99999928474426 1012.9999966621399,402.9999988079071 1091.4999961853027,402.9999988079071"
+            },
+            "src": {
+                "port": "modelOut",
+                "process": "jupyter2"
+            },
+            "tgt": {
+                "port": "inbody",
+                "process": "tomessageconverter2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1150.4999961853027,185.99999976158142 1213.9999957084656,185.99999976158142 1213.9999957084656,234.5 1289.9999947547913,234.5 1289.9999947547913,231 1317.999994277954,231"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter3"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactproducer2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "908.9999980926514,279.99999928474426 936.9999976158142,279.99999928474426 936.9999976158142,272.99999928474426 1028.99999666214,272.99999928474426 1028.99999666214,176.99999976158142 1091.4999961853027,176.99999976158142"
+            },
+            "src": {
+                "port": "testOut",
+                "process": "jupyter2"
+            },
+            "tgt": {
+                "port": "inbody",
+                "process": "tomessageconverter3"
+            }
+        },
+        {
+            "metadata": {
+                "points": "141,253.99999928474426 168.99999952316284,253.99999928474426 168.99999952316284,244.99999928474426 196.99999904632568,244.99999928474426"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator1"
+            },
+            "tgt": {
+                "port": "sql",
+                "process": "saphanaclient1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "325.9999990463257,253.99999928474426 365.9999990463257,253.99999928474426"
+            },
+            "src": {
+                "port": "result",
+                "process": "saphanaclient1"
+            },
+            "tgt": {
+                "port": "input1",
+                "process": "python3operator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "494.9999990463257,253.99999928474426 522.9999985694885,253.99999928474426 522.9999985694885,261.99999928474426 570.9999980926514,261.99999928474426"
+            },
+            "src": {
+                "port": "out",
+                "process": "python3operator1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "jupyter1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {}
+}
