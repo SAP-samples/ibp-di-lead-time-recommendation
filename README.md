@@ -11,7 +11,7 @@ If not stated otherwise, manual steps are to be done in the SAP Data Intelligenc
 3. Create docker files. Copy the files from the dockerfiles folder
 4. Create an ML Scenario, for example with the name Lead Time Prediction
 5. Within the ML Scenario start the creation of a first Jupyter Notebook. From within Jupyter Labs import the files from the notebooks folder inside the dsp folder
-6. Within the ML Scenario the creation of three Piplines, one by one. Inside the Modeler copy the json files from the pipelines folder inside the dsp folder
+6. Within the ML Scenario start the creation of three Piplines, one by one. Inside the Modeler copy the json files from the pipelines folder inside the dsp folder
 
 ## Known Issues
 
