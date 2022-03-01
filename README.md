@@ -6,7 +6,7 @@
 
 ## Download and Installation: 
 If not stated otherwise, manual steps are to be done in the SAP Data Intelligence system.
-1. Create an OData connection to your IBP system. Copy the example json file from the connections folder
+1. Create an OData connection to your IBP system. As as reference you may use the example json file from the connections folder
 2. Create a Python 3 Custom Operator which writes the key figure values to the IBP system. Copy the script and schema files from the folder python3Operator
 3. Create docker files. Copy the files from the dockerfiles folder
 4. Create an ML Scenario, for example with the name Lead Time Prediction
