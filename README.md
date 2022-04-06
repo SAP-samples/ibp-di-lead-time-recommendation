@@ -8,7 +8,7 @@
 Unless otherwise stated, please complete the manual steps in the SAP Data Intelligence system.
 1. Create an OData connection to your Integrated Business Planning for Supply Chain (SAP IBP) system. As a as reference you may use the example json file from the connections folder
 2. Create an ABAP connection to your SAP S4/HANA or SAP Enterprise Resource Planning (SAP ERP) system. As a as reference you may use the example json file from the connections folder
-3. In the SAP S4/HANA or SAP ERP system create an ABAP CDS view. As a reference please use the example json file from the cds folder
+3. In the SAP S4/HANA or SAP ERP system create two ABAP CDS views. As a reference please use the example cds files from the cds folder
 4. Create a Python 3 Custom Operator that writes the key figure values to the SAP IBP system. Copy the script and schema files from the python3Operator folder
 5. Create docker files. Copy the files from the dockerfiles folder
 6. Create a machine learning (ML) Scenario, for example with the name Lead Time Prediction
