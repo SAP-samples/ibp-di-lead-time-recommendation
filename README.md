@@ -1,8 +1,10 @@
 # Lead Time Prediction for Integrated Business Planning for Supply Chain (SAP IBP)
 
-## SAP Data Intelligence based solution that predicts transport lead times based on observed transport durations and writes the results to an IBP key figure
+## Description
+SAP Data Intelligence based solution that predicts transport lead times based on observed transport durations and writes the results to an IBP key figure.
 
-## Requirements: User licenses for and experience with SAP Data Intelligence and SAP Integrated Business Planning
+## Requirements
+User licenses for and experience with SAP Data Intelligence and SAP Integrated Business Planning.
 
 ## Download and Installation: 
 Unless otherwise stated, please complete the manual steps in the SAP Data Intelligence system.
@@ -20,6 +22,7 @@ To learn about the functional details please visit the SAP Discovery Center and 
 https://discovery-center.cloud.sap
 
 ## Known Issues
+None
 
 ## How to obtain support
 [Create an issue](https://github.com/SAP-samples/<repository-name>/issues) in this repository if you find a bug or have questions about the content.
