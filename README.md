@@ -6,14 +6,14 @@
 
 ## Download and Installation: 
 Unless otherwise stated, please complete the manual steps in the SAP Data Intelligence system.
-1. Create an OData connection to your Integrated Business Planning for Supply Chain (SAP IBP) system. As a as reference you may use the example json file from the connections folder
-2. Create an ABAP connection to your SAP S4/HANA or SAP Enterprise Resource Planning (SAP ERP) system. As a as reference you may use the example json file from the connections folder
+1. Create an OData connection to your Integrated Business Planning for Supply Chain (SAP IBP) system
+2. Create an ABAP connection to your SAP S4/HANA or SAP Enterprise Resource Planning (SAP ERP) system
 3. In the SAP S4/HANA or SAP ERP system create two ABAP CDS views. As a reference please use the example cds files from the cds folder
 4. Create a Python 3 Custom Operator that writes the key figure values to the SAP IBP system. Copy the script and schema files from the python3Operator folder
-5. Create docker files. Copy the files from the dockerfiles folder
+5. Create docker files. Copy the files from the Repository/dockerfiles folder
 6. Create a machine learning (ML) Scenario, for example with the name Lead Time Prediction
-7. In the ML scenario create your first Jupyter notebook. In Jupyter Labs, import the files from the notebooks folder inside the dsp folder
-8. In the ML scenario create three pipelines, one by one. Inside the modeler define the pipelines by copying the json files from the pipelines folder inside the dsp folder
+7. In the ML scenario create your first Jupyter notebook. In Jupyter Labs, import the files from the notebooks folder
+8. In the ML scenario create three pipelines, one by one. Inside the modeler define the pipelines by copying the json files from the pipelines folder
 
 ## Known Issues
 
