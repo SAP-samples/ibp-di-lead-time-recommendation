@@ -15,6 +15,10 @@ Unless otherwise stated, please complete the manual steps in the SAP Data Intell
 7. In the ML scenario create your first Jupyter notebook. In Jupyter Labs, import the files from the notebooks folder
 8. In the ML scenario create three pipelines, one by one. Inside the modeler define the pipelines by copying the json files from the pipelines folder
 
+## Additional Information
+To learn about the functional details please visit the SAP Discovery Center and look up the mission Improve Plan Quality with Intelligent Lead Time Prediction 
+https://discovery-center.cloud.sap
+
 ## Known Issues
 
 ## How to obtain support
