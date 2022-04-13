@@ -76,11 +76,3 @@ def add_time_columns_date(data, date_col, times):
     if 'month' in times:
         data['MONTH'] = data[date_col].dt.month
     return data
-
-
-def process_hana_data(read_from_db=True, date_col='', horizon=''):
-    print('Load data')
-    dp = DataProxy(hana_address="52.203.187.198", hana_port=30015, hana_user="system", hana_password="Welcome01")
-    data = Prov.get_erp_lead_times_matdoc(dp, read_from_db=read_from_db)
-    data_processed = preprocess_erp_lt_matdoc(data, date_col_raw=date_col, horizon=horizon)
-    return data_processed
