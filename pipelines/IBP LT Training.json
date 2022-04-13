@@ -173,7 +173,8 @@
 					"action": "Initial Load",
 					"wireformat": "Enhanced Format Conversions",
 					"cdsname": "Z_ISSUES",
-					"subscriptionName": "<subID>"
+					"subscriptionName": "<subID>",
+					"chunkSize": 1000
 				},
 				"additionaloutports": [
 					{
@@ -601,19 +602,6 @@
 			"tgt": {
 				"port": "in",
 				"process": "jupyter1"
-			}
-		},
-		{
-			"metadata": {
-				"points": "320.9999990463257,112 360.9999990463257,112"
-			},
-			"src": {
-				"port": "out",
-				"process": "python3operator2"
-			},
-			"tgt": {
-				"port": "in",
-				"process": "wiretap1"
 			}
 		}
 	],
