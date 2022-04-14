@@ -189,7 +189,7 @@
 				"width": 120,
 				"extensible": true,
 				"config": {
-					"content": "{\"artifact\": {\"id\": \"${ARTIFACT:METADATA}\"}}"
+					"content": "{\"artifact\": {\"id\": \"${ARTIFACT:PlanningCombinationsFilename}\"}}"
 				}
 			}
 		},
