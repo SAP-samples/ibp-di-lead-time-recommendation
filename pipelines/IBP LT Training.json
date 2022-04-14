@@ -136,7 +136,7 @@
 				],
 				"generation": 1,
 				"config": {
-					"script": "def on_input(in_i,in_r):\n    from io import StringIO\n    import csv    \n    import pandas as pd\n    import json\n    \n#   read body\n    in_i = StringIO(ISSUES.body)\n    in_r = StringIO(RECEIPTS.body)\n    \n#   read attributes\n    a_a = []\n    t_i=pd.DataFrame([])\n    for k,v in ISSUES.attributes.items():\n        if str(k)=='metadata':\n            a_a = [f['Field']['ColumnName'] for f in v]\n#            a_a.pop()\n#           create issues dataframe\n            t_i = pd.read_csv(in_i, index_col = False, names = a_a) \n        break\n    \n    a_a = []\n    t_r=pd.DataFrame([])\n    for k,v in RECEIPTS.attributes.items():\n        if str(k)=='metadata':\n            a_a = [f['Field']['ColumnName'] for f in v]\n#            a_a.pop()\n#           create receipts dataframe\n            t_r = pd.read_csv(in_r, index_col = False, names = a_a) \n        break\n\n    t_i = t_i.replace({'batchid': {None:''}})\n    t_i['num'] = t_i.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n    t_r = t_r.replace({'batchid': {None:''}})\n    t_r['num'] = t_r.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n    trans = pd.merge(t_i,t_r,on=['docid','locid','prdid','batchid','qty','num'],how='inner')\n\n    trans['lt'] = trans['otime_y']-trans['otime_x']\n    trans.rename(columns={'otime_x':'iotime','otime_y':'rotime'},inplace=True)\n    \n    api.send(\"out\", str(trans.to_json()))\n\napi.set_port_callback(['ISSUES','RECEIPTS'], on_input)\n\n\n\n# import pandas as pd\n# from io import StringIO\n# def on_input(msgi,msgr):\n#     issues = StringIO(msgi.body.decode(\"utf-8\"))\n#     receipts = StringIO(msgr.body.decode(\"utf-8\"))\n#     t_i = pd.read_csv(issues)\n#     t_r = pd.read_csv(receipts)\n\n#     t_i = t_i.drop(columns=['batchid_len', 'batchid_left', 'SOURCE'])\n#     t_i = t_i.replace({'batchid': {None:''}})\n#     t_i['num'] = t_i.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n#     t_r = t_r.drop(columns=['batchid_len', 'batchid_left', 'SOURCE'])\n#     t_r = t_r.replace({'batchid': {None:''}})\n#     t_r['num'] = t_r.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n#     trans = pd.merge(t_i,t_r,on=['docid','locid','prdid','batchid','qty','num'],how='inner')\n\n#     trans['lt'] = trans['otime_y']-trans['otime_x']\n#     trans.rename(columns={'otime_x':'iotime','otime_y':'rotime'},inplace=True)\n\n#     api.send(\"transports\", trans.to_string())\n\n# api.set_port_callback([\"issues\",\"receipts\"], on_input)\n"
+					"script": "def on_input(msgi,msgr):\n    from io import StringIO\n    import csv    \n    import pandas as pd\n    import json\n    \n#   read body\n    s_i = StringIO(msgi.body)\n    s_r = StringIO(msgr.body)\n    \n#   read attributes\n    a_a = []\n    t_i=pd.DataFrame([])\n    for k,v in msgi.attributes.items():\n        if str(k)=='metadata':\n            a_a = [f['Field']['ColumnName'] for f in v]\n#            a_a.pop()\n#           create issues dataframe\n            t_i = pd.read_csv(s_i, index_col = False, names = a_a) \n        break\n    \n    a_a = []\n    t_r=pd.DataFrame([])\n    for k,v in msgr.attributes.items():\n        if str(k)=='metadata':\n            a_a = [f['Field']['ColumnName'] for f in v]\n#            a_a.pop()\n#           create receipts dataframe\n            t_r = pd.read_csv(s_r, index_col = False, names = a_a) \n        break\n\n    t_i = t_i.replace({'batchid': {None:''}})\n    t_i['num'] = t_i.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n    t_r = t_r.replace({'batchid': {None:''}})\n    t_r['num'] = t_r.groupby(['docid','locid','prdid','batchid','qty'])['otime'].rank()\n\n    trans = pd.merge(t_i,t_r,on=['docid','locid','prdid','batchid','qty','num'],how='inner')\n\n    trans['lt'] = trans['otime_y']-trans['otime_x']\n    trans.rename(columns={'otime_x':'iotime','otime_y':'rotime'},inplace=True)\n    \n    api.send(\"out\", str(trans.to_json()))\n\napi.set_port_callback(['ISSUES','RECEIPTS'], on_input)"
 				},
 				"additionalinports": [
 					{
@@ -173,7 +173,7 @@
 					"action": "Initial Load",
 					"wireformat": "Enhanced Format Conversions",
 					"cdsname": "Z_ISSUES",
-					"subscriptionName": "<subID>",
+					"subscriptionName": "ISSUES001",
 					"chunkSize": 1000
 				},
 				"additionaloutports": [
@@ -235,7 +235,7 @@
 					"action": "Initial Load",
 					"wireformat": "Enhanced Format Conversions",
 					"chunkSize": 1000,
-					"subscriptionName": "<diff_subID>",
+					"subscriptionName": "RECEIPTS001",
 					"cdsname": "Z_RECEIPTS"
 				},
 				"additionaloutports": [
