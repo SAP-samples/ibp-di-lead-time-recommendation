@@ -1,4 +1,4 @@
-@AbapCatalog.sqlViewName: 'Z_RECEIPTS'
+@AbapCatalog.sqlViewName: 'Z_SQL_RECEIPTS'
 @AbapCatalog.compiler.compareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #CHECK
