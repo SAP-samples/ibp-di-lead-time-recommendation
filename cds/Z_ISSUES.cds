@@ -1,4 +1,4 @@
-@AbapCatalog.sqlViewName: 'Z_ISSUES'
+@AbapCatalog.sqlViewName: 'Z_SQL_ISSUES'
 @AbapCatalog.compiler.compareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #CHECK
