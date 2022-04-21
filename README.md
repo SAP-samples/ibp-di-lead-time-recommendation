@@ -19,7 +19,7 @@ Unless otherwise stated, please complete the manual steps in the SAP Data Intell
 
 ## Additional Information
 To learn about the functional details please visit the SAP Discovery Center and look up the mission Improve Plan Quality with Intelligent Lead Time Prediction 
-https://discovery-center.cloud.sap
+https://discovery-center.cloud.sap/missiondetail/3811/3861/
 
 ## Known Issues
 None
