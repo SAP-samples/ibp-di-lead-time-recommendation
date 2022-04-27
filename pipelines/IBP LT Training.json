@@ -155,7 +155,7 @@
 		"abapcdsreader1": {
 			"component": "com.sap.abap.cds.reader",
 			"metadata": {
-				"label": "CDS Read Issues",
+				"label": "CDS Read Material Movements",
 				"x": 12,
 				"y": 213.99999928474426,
 				"height": 80,
@@ -169,7 +169,7 @@
 					"action": "Initial Load",
 					"wireformat": "Enhanced Format Conversions",
 					"cdsname": "Z_IBP_MATMOVEMENTS",
-					"subscriptionName": "MMOVE001",
+					"subscriptionName": "MATMOVE001",
 					"chunkSize": 1000
 				},
 				"additionaloutports": [
