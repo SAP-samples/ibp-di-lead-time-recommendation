@@ -18,7 +18,7 @@ Unless otherwise stated, please complete the manual steps in the SAP Data Intell
 8. In the ML scenario create three pipelines, one by one. Inside the modeler define the pipelines by copying the json files from the pipelines folder
 
 ## Additional Information
-To learn about the functional details, and for step by step instructions to configure and execute the IBP DI Lead Time Recommendation solution, please visit the SAP Discovery Center and look up the mission Improve Plan Quality with Intelligent Lead Time Prediction 
+To learn about the functional details, and for step by step instructions to configure and implement the IBP DI Lead Time Recommendation solution, please visit the SAP Discovery Center and look up the mission Improve Plan Quality with Intelligent Lead Time Prediction 
 https://discovery-center.cloud.sap/missiondetail/3811/3861/
 
 ## Known Issues
