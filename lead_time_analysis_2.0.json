@@ -1,0 +1,1927 @@
+{
+    "properties": {},
+    "icon": "sitemap",
+    "description": "SNI Total",
+    "processes": {
+        "python3operator21111": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Train Supplier Model",
+                "x": 839.9999952316284,
+                "y": 485,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "def on_input(streventlink):\n    import pandas as pd\n    import numpy as np\n    import pickle\n    import scevent.mlsetting as mls\n    from sklearn.model_selection import train_test_split \n    import catboost\n    import json\n\n#   set column data types   \n    t_el = pd.read_json(streventlink,dtype=False)\n    d_col = dict(filter(lambda item: item[0] in t_el.columns, mls.col_dtype.items()))\n    t_el = t_el.astype(d_col)\n    \n#   add date features\n    t_el['OTIMEDT_P'] = pd.to_datetime(t_el['OTIME_P'])\n    t_el['WEEKDAY'] = t_el['OTIMEDT_P'].dt.weekday\n    t_el['WEEK'] = t_el['OTIMEDT_P'].dt.isocalendar().week\n    t_el['MONTH'] = t_el['OTIMEDT_P'].dt.month \n    \n    t_el['WEEKDAY'] = t_el['WEEKDAY'].astype(np.int)\n    t_el['WEEK'] = t_el['WEEK'].astype(np.int)\n    t_el['MONTH'] = t_el['MONTH'].astype(np.int)\n    \n#   split data into training, test, validation\n    # fit_test_split = 0.9\n    train_valid_split = 0.8\n    # fit, test = train_test_split(t_el, train_size=fit_test_split, random_state=42)\n    train, valid = train_test_split(t_el, train_size=train_valid_split, random_state=42)  \n    \n#   train\n    model = catboost.CatBoostRegressor(\n        learning_rate = 0.1,\n        iterations = 1000,\n        early_stopping_rounds = 50,\n        depth = 10\n    )\n    x = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH']\n    y = 'LT'\n    model.fit(\n        train[x],\n        train[y], \n        cat_features = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P'], \n        verbose=50, \n        eval_set = (valid[x], valid[y])\n    )\n    \n      #get scores\n    vmc = model.get_best_score()['validation']['RMSE']\n    lmc = model.get_best_score()['learn']['RMSE']\n        \n    #   convert to persistence format    \n    metrics = str({\"Time\" : str(pd.Timestamp.now()), \"Learn\" : str(lmc), \"Validation\" : str(vmc)})\n    model_blob = pickle.dumps(model)\n    \n    # api.send(\"MLResult\", str(vrmse)+' | '+str(lrmse))\n    api.send(\"MLResult\", metrics)\n    api.send(\"model\", model_blob)\n    \n    \napi.set_port_callback([\"EventLink\"], on_input)    "
+                },
+                "additionalinports": [
+                    {
+                        "name": "EventLink",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "MLResult",
+                        "type": "string"
+                    },
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator2111"
+        },
+        "python3operator2111": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Train Production Model",
+                "x": 839.9999952316284,
+                "y": 245,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "def on_input(streventlink):\n    import pandas as pd\n    import numpy as np\n    import pickle\n    import scevent.mlsetting as mls\n    from sklearn.model_selection import train_test_split \n    import catboost\n    import json\n\n#   set column data types   \n    t_el = pd.read_json(streventlink,dtype=False)\n    d_col = dict(filter(lambda item: item[0] in t_el.columns, mls.col_dtype.items()))\n    t_el = t_el.astype(d_col)\n    \n#   add date features\n    t_el['OTIMEDT_P'] = pd.to_datetime(t_el['OTIME_P'])\n    t_el['WEEKDAY'] = t_el['OTIMEDT_P'].dt.weekday\n    t_el['WEEK'] = t_el['OTIMEDT_P'].dt.isocalendar().week\n    t_el['MONTH'] = t_el['OTIMEDT_P'].dt.month \n    \n    t_el['WEEKDAY'] = t_el['WEEKDAY'].astype(np.int)\n    t_el['WEEK'] = t_el['WEEK'].astype(np.int)\n    t_el['MONTH'] = t_el['MONTH'].astype(np.int)\n    \n#   split data into training, test, validation\n    # fit_test_split = 0.9\n    train_valid_split = 0.8\n    # fit, test = train_test_split(t_el, train_size=fit_test_split, random_state=42)\n    train, valid = train_test_split(t_el, train_size=train_valid_split, random_state=42)  \n    \n#   train\n    model = catboost.CatBoostRegressor(\n        learning_rate = 0.1,\n        iterations = 1000,\n        early_stopping_rounds = 50,\n        depth = 10\n    )\n    x = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH']\n    y = 'LT'\n    model.fit(\n        train[x],\n        train[y], \n        cat_features = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P'], \n        verbose=50, \n        eval_set = (valid[x], valid[y])\n    )\n    \n      #get scores\n    vmc = model.get_best_score()['validation']['RMSE']\n    lmc = model.get_best_score()['learn']['RMSE']\n        \n    #   convert to persistence format    \n    metrics = str({\"Time\" : str(pd.Timestamp.now()), \"Learn\" : str(lmc), \"Validation\" : str(vmc)})\n    model_blob = pickle.dumps(model)\n    \n    # api.send(\"MLResult\", str(vrmse)+' | '+str(lrmse))\n    api.send(\"MLResult\", metrics)\n    api.send(\"model\", model_blob)\n    \n    \napi.set_port_callback([\"EventLink\"], on_input)    "
+                },
+                "additionalinports": [
+                    {
+                        "name": "EventLink",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "MLResult",
+                        "type": "string"
+                    },
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator211"
+        },
+        "python3operator211": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Train Transportation Model",
+                "x": 839.9999952316284,
+                "y": 365,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "def on_input(streventlink):\n    import pandas as pd\n    import numpy as np\n    import pickle\n    import scevent.mlsetting as mls\n    from sklearn.model_selection import train_test_split \n    import catboost\n    import json\n\n#   set column data types   \n    t_el = pd.read_json(streventlink,dtype=False)\n    d_col = dict(filter(lambda item: item[0] in t_el.columns, mls.col_dtype.items()))\n    t_el = t_el.astype(d_col)\n    \n#   add date features\n    t_el['OTIMEDT_P'] = pd.to_datetime(t_el['OTIME_P'])\n    t_el['WEEKDAY'] = t_el['OTIMEDT_P'].dt.weekday\n    t_el['WEEK'] = t_el['OTIMEDT_P'].dt.isocalendar().week\n    t_el['MONTH'] = t_el['OTIMEDT_P'].dt.month \n    \n    t_el['WEEKDAY'] = t_el['WEEKDAY'].astype(np.int)\n    t_el['WEEK'] = t_el['WEEK'].astype(np.int)\n    t_el['MONTH'] = t_el['MONTH'].astype(np.int)\n    \n#   split data into training, test, validation\n    # fit_test_split = 0.9\n    train_valid_split = 0.8\n    # fit, test = train_test_split(t_el, train_size=fit_test_split, random_state=42)\n    train, valid = train_test_split(t_el, train_size=train_valid_split, random_state=42)  \n    \n#   train\n    model = catboost.CatBoostRegressor(\n        learning_rate = 0.1,\n        iterations = 1000,\n        early_stopping_rounds = 50,\n        depth = 10\n    )\n    x = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH']\n    y = 'LT'\n    model.fit(\n        train[x],\n        train[y], \n        cat_features = ['PRDID', 'PRDID_P', 'LOCID', 'LOCID_P', 'TYP', 'TYP_P'], \n        verbose=50, \n        eval_set = (valid[x], valid[y])\n    )\n    \n      #get scores\n    vmc = model.get_best_score()['validation']['RMSE']\n    lmc = model.get_best_score()['learn']['RMSE']\n        \n    #   convert to persistence format    \n    metrics = str({\"Time\" : str(pd.Timestamp.now()), \"Learn\" : str(lmc), \"Validation\" : str(vmc)})\n    model_blob = pickle.dumps(model)\n    \n    # api.send(\"MLResult\", str(vrmse)+' | '+str(lrmse))\n    api.send(\"MLResult\", metrics)\n    api.send(\"model\", model_blob)\n    \n    \napi.set_port_callback([\"EventLink\"], on_input)    "
+                },
+                "additionalinports": [
+                    {
+                        "name": "EventLink",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "MLResult",
+                        "type": "string"
+                    },
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator21"
+        },
+        "python3operator423": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Transporation Prediction",
+                "x": 2284.999988555908,
+                "y": 515,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "import catboost\r\nimport pandas as pd\r\nfrom mlModules import control\r\nimport pickle\r\n\r\ndef predict(days, model, supplynetwork):\r\n    results = pd.DataFrame()\r\n    tomorrow = pd.to_datetime(\"today\") + pd.DateOffset(days=1)\r\n    for day in pd.date_range(start = tomorrow, periods = days, normalize = True):\r\n        x = supplynetwork.copy()\r\n        x['DAY'] = day\r\n        x['WEEK'] = int(day.week)\r\n        x['WEEKDAY'] = int(day.weekday())\r\n        x['MONTH'] = int(day.month)\r\n        x = x[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH', 'DAY']]\r\n        x['PREDICTEDLEADTIMES'] = model.predict(x).clip(min=0)\r\n        results = results.append(x, ignore_index=True)\r\n    resBlob = pickle.dumps(results)\r\n    api.send(\"prediction\", resBlob)\r\n\r\ndef onInput(days, supplynetworkBlob, modelBlob):\r\n    global model, predDays, supplynetwork\r\n    model = pickle.loads(modelBlob)\r\n    supplynetwork = pickle.loads(supplynetworkBlob)\r\n    predDays = int(days)\r\n    predict(predDays, model, supplynetwork)\r\napi.set_port_callback([\"days\", \"supplynetwork\", \"model\"], onInput)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "days",
+                        "type": "string"
+                    },
+                    {
+                        "name": "supplynetwork",
+                        "type": "blob"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "prediction",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator42"
+        },
+        "python3operator4211": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Production Prediction",
+                "x": 2284.999988555908,
+                "y": 755,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "import catboost\r\nimport pandas as pd\r\nfrom mlModules import control\r\nimport pickle\r\n\r\ndef predict(days, model, supplynetwork):\r\n    results = pd.DataFrame()\r\n    tomorrow = pd.to_datetime(\"today\") + pd.DateOffset(days=1)\r\n    for day in pd.date_range(start = tomorrow, periods = days, normalize = True):\r\n        x = supplynetwork.copy()\r\n        x['DAY'] = day\r\n        x['WEEK'] = int(day.week)\r\n        x['WEEKDAY'] = int(day.weekday())\r\n        x['MONTH'] = int(day.month)\r\n        x = x[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH', 'DAY']]\r\n        x['PREDICTEDLEADTIMES'] = model.predict(x).clip(min=0)\r\n        results = results.append(x, ignore_index=True)\r\n    resBlob = pickle.dumps(results)\r\n    api.send(\"prediction\", resBlob)\r\n\r\ndef onInput(days, supplynetworkBlob, modelBlob):\r\n    global model, predDays, supplynetwork\r\n    model = pickle.loads(modelBlob)\r\n    supplynetwork = pickle.loads(supplynetworkBlob)\r\n    predDays = int(days)\r\n    predict(predDays, model, supplynetwork)\r\napi.set_port_callback([\"days\", \"supplynetwork\", \"model\"], onInput)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "days",
+                        "type": "string"
+                    },
+                    {
+                        "name": "supplynetwork",
+                        "type": "blob"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "prediction",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator421"
+        },
+        "python3operator4221": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Supplier Prediction",
+                "x": 2284.999988555908,
+                "y": 635,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "import catboost\r\nimport pandas as pd\r\nfrom mlModules import control\r\nimport pickle\r\n\r\ndef predict(days, model, supplynetwork):\r\n    results = pd.DataFrame()\r\n    tomorrow = pd.to_datetime(\"today\") + pd.DateOffset(days=1)\r\n    for day in pd.date_range(start = tomorrow, periods = days, normalize = True):\r\n        x = supplynetwork.copy()\r\n        x['DAY'] = day\r\n        x['WEEK'] = int(day.week)\r\n        x['WEEKDAY'] = int(day.weekday())\r\n        x['MONTH'] = int(day.month)\r\n        x = x[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'WEEKDAY', 'WEEK', 'MONTH', 'DAY']]\r\n        x['PREDICTEDLEADTIMES'] = model.predict(x).clip(min=0)\r\n        results = results.append(x, ignore_index=True)\r\n    resBlob = pickle.dumps(results)\r\n    api.send(\"prediction\", resBlob)\r\n\r\ndef onInput(days, supplynetworkBlob, modelBlob):\r\n    global model, predDays, supplynetwork\r\n    model = pickle.loads(modelBlob)\r\n    supplynetwork = pickle.loads(supplynetworkBlob)\r\n    predDays = int(days)\r\n    predict(predDays, model, supplynetwork)\r\napi.set_port_callback([\"days\", \"supplynetwork\", \"model\"], onInput)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "model",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "days",
+                        "type": "string"
+                    },
+                    {
+                        "name": "supplynetwork",
+                        "type": "blob"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "prediction",
+                        "type": "blob"
+                    }
+                ]
+            },
+            "name": "python3operator422"
+        },
+        "python3operator11": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 2637.9999856948853,
+                "y": 635,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "import pandas as pd\nimport pickle\n\ndef onInput(TRPrediction, PRPrediction, SUPrediction):\n    transportation = pickle.loads(TRPrediction)\n    production = pickle.loads(PRPrediction)\n    supplier = pickle.loads(SUPrediction)\n    results = pd.concat([transportation, production, supplier], ignore_index=True)\n    prediction = pickle.dumps(results)\n    api.send('prediction', prediction)\n    \napi.set_port_callback([\"TRPrediction\", \"PRPrediction\", \"SUPrediction\"], onInput)\n    "
+                },
+                "additionalinports": [
+                    {
+                        "name": "TRPrediction",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "PRPrediction",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "SUPrediction",
+                        "type": "blob"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "prediction",
+                        "type": "message"
+                    }
+                ]
+            },
+            "name": "python3operator1"
+        },
+        "python3operator1111": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Build SC Event Graph",
+                "x": 406.99999809265137,
+                "y": 589,
+                "height": 172,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "subengines": [
+                    "com.sap.python36"
+                ],
+                "config": {
+                    "script": "def on_input(msgmmov):\n    import pandas as pd\n    import pickle\n    \n    t = pd.DataFrame(msgmmov.body)\n    t['OTIMEDT'] = pd.to_datetime(t['OTIME']) # new column \"OTIMEDT\" which is datetime version of \"OTIME\"\n \n#   purchase order events \n    t_puoi = t[t['TYP'].isin(['PUOI'])] # new table where \"TYP\" = PUOI, PUOS\n    t_puor = t[t['TYP']=='PUOR'] # new table where \"TYP\" = PUOR\n        \n    t_puoel = pd.merge(t_puoi,t_puor,on=['DOCID','ITID','PRDID'],how='inner',suffixes=('_P',None))\n    t_puoel['LT'] = (t_puoel['OTIMEDT']-t_puoel['OTIMEDT_P']).dt.total_seconds()\n    t_puoel['LT'] = t_puoel['LT'] / (3600*24)\n    t_puoel = t_puoel[t_puoel['LT']>=0]\n    t_puoel = t_puoel[t_puoel['LT'] < 20]\n    t_puoel['PRDID_P'] = t_puoel['PRDID']\n    \n    s_transport_out = str(t_puoel.to_json())\n    api.send(\"Transport\", s_transport_out)\n    \n#   remove time features to create supply network table\n    t_sn_transportation = t_puoel.drop(columns=['OTIME', 'OTIME_P', 'OTIMEDT', 'OTIMEDT_P'])\n    t_sn_transportation = t_sn_transportation.groupby(['LOCID_P','PRDID_P','LOCID', 'PRDID', 'TYP', 'TYP_P']).mean().reset_index()\n    t_sn_transportation = t_sn_transportation.drop(columns=['LT'])\n    \n    sn_transportation_out = pickle.dumps(t_sn_transportation)\n    api.send(\"SNTransportation\", sn_transportation_out)\n    \n    tr_means = t_puoel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).mean().reset_index()\n    tr_stds = t_puoel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).std(ddof=0).reset_index()\n    tr_stats = pd.merge(tr_means,tr_stds, on=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P'], how='left')\n    tr_stats = tr_stats[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'LT_x', 'LT_y']]\n    tr_stats.rename(columns = {'LT_x':'LT_Mean', 'LT_y':'LT_STD'}, inplace = True)\n    \n    tr_stats_out = str(tr_stats.to_json())\n    api.send(\"TRStats\", tr_stats_out)\n    \n#   purchase order events \n    t_puos = t[t['TYP'].isin(['PUOS'])] # new table where \"TYP\" = PUOI, PUOS\n        \n    t_puosel = pd.merge(t_puos,t_puor,on=['DOCID','ITID','PRDID'],how='inner',suffixes=('_P',None))\n    t_puosel['LT'] = (t_puosel['OTIMEDT']-t_puosel['OTIMEDT_P']).dt.total_seconds()\n    t_puosel['LT'] = t_puosel['LT'] / (3600*24)\n    t_puosel = t_puosel[t_puosel['LT']>=0]\n    t_puosel = t_puosel[t_puosel['LT']<30]\n    t_puosel['PRDID_P'] = t_puosel['PRDID']\n    \n    s_supplier_out = str(t_puosel.to_json())\n    api.send(\"Supplier\", s_supplier_out)\n    \n#   remove time features to create supply network table\n    t_sn_supplier = t_puosel.drop(columns=['OTIME', 'OTIME_P', 'OTIMEDT', 'OTIMEDT_P'])\n    t_sn_supplier = t_sn_supplier.groupby(['LOCID_P','PRDID_P','LOCID', 'PRDID', 'TYP', 'TYP_P']).mean().reset_index()\n    t_sn_supplier = t_sn_supplier.drop(columns=['LT'])\n    \n    sn_supplier_out = pickle.dumps(t_sn_supplier)\n    api.send(\"SNSupplier\", sn_supplier_out)\n    \n    su_means = t_puosel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).mean().reset_index()\n    su_stds = t_puosel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).std(ddof=0).reset_index()\n    su_stats = pd.merge(su_means,su_stds, on=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P'], how='left')\n    su_stats = su_stats[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'LT_x', 'LT_y']]\n    su_stats.rename(columns = {'LT_x':'LT_Mean', 'LT_y':'LT_STD'}, inplace = True)\n    \n    su_stats_out = str(su_stats.to_json())\n    api.send(\"SUStats\", su_stats_out)\n\n#   production order events\n    t_proi = t[t['TYP']=='PROI']\n    t_pror = t[t['TYP']=='PROR']\n    \n    t_proel = pd.merge(t_proi,t_pror,on=['DOCID'],how='inner',suffixes=('_P',None))\n    t_proel['LT'] = (t_proel['OTIMEDT']-t_proel['OTIMEDT_P']).dt.total_seconds()\n    t_proel['LT'] = t_proel['LT'] / (3600*24)\n    t_proel = t_proel[t_proel['LT']>=0]\n    \n    s_production_out = str(t_proel.to_json())\n    api.send(\"Production\", s_production_out)\n    \n#   remove time features to create supply network table\n    t_sn_production = t_proel.drop(columns=['OTIME', 'OTIME_P', 'OTIMEDT', 'OTIMEDT_P'])\n    t_sn_production = t_sn_production.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).mean().reset_index()\n    t_sn_production = t_sn_production.drop(columns=['LT'])\n    \n    sn_production_out =pickle.dumps(t_sn_production)\n    api.send(\"SNProduction\", sn_production_out)\n    \n    pr_means = t_proel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).mean().reset_index()\n    pr_stds = t_proel.groupby(by=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P']).std(ddof=0).reset_index()\n    pr_stats = pd.merge(pr_means,pr_stds, on=['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P'], how='left')\n    pr_stats = pr_stats[['PRDID', 'LOCID', 'LOCID_P', 'PRDID_P', 'TYP', 'TYP_P', 'LT_x', 'LT_y']]\n    pr_stats.rename(columns = {'LT_x':'LT_Mean', 'LT_y':'LT_STD'}, inplace = True)\n    \n    pr_stats_out = str(pr_stats.to_json())\n    api.send(\"PRStats\", pr_stats_out)\n\napi.set_port_callback([\"MMove\"], on_input)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "MMove",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "Transport",
+                        "type": "string"
+                    },
+                    {
+                        "name": "Production",
+                        "type": "string"
+                    },
+                    {
+                        "name": "Supplier",
+                        "type": "string"
+                    },
+                    {
+                        "name": "SNTransportation",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "SNProduction",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "SNSupplier",
+                        "type": "blob"
+                    },
+                    {
+                        "name": "TRStats",
+                        "type": "string"
+                    },
+                    {
+                        "name": "PRStats",
+                        "type": "string"
+                    },
+                    {
+                        "name": "SUStats",
+                        "type": "string"
+                    }
+                ]
+            },
+            "name": "python3operator111"
+        },
+        "tofile121": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 1199.4999933242798,
+                "y": 342,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile12"
+        },
+        "tofile311": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 617,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile31"
+        },
+        "writefile121": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write Model File",
+                "x": 1445.9999923706055,
+                "y": 267,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_TR_MLModel",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile12"
+        },
+        "writefile211": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write Supply Network File",
+                "x": 1164.9999933242798,
+                "y": 642,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_TR_SupplyNetwork",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile21"
+        },
+        "readfile1": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Model File",
+                "x": 1630.9999914169312,
+                "y": 252,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "readfile2": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Supply Network File",
+                "x": 1445.9999923706055,
+                "y": 507,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "wiretap3": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1164.9999933242798,
+                "y": 222,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "readfile22": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Model File",
+                "x": 1630.9999914169312,
+                "y": 132,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "dynamicConnection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    }
+                }
+            },
+            "name": "readfile2"
+        },
+        "tofile13": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 1199.4999933242798,
+                "y": 132,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile1"
+        },
+        "writefile13": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Save the Model File",
+                "x": 1445.9999923706055,
+                "y": 147,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_PR_MLModel",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile1"
+        },
+        "wiretap4": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1164.9999933242798,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "constantgenerator21": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Constant Generator",
+                "x": 1630.9999914169312,
+                "y": 582,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "content": "${DaysToPredict}"
+                }
+            },
+            "name": "constantgenerator2"
+        },
+        "toblobconverter11": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1665.4999914169312,
+                "y": 492,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "toblobconverter1"
+        },
+        "toblobconverter1": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1946.4999904632568,
+                "y": 550.5000007152557,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "toblobconverter2": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1946.4999904632568,
+                "y": 460.50000071525574,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "wiretap41": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1164.9999933242798,
+                "y": 432,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            },
+            "name": "wiretap4"
+        },
+        "toblobconverter21": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1946.4999904632568,
+                "y": 640.5000007152557,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "toblobconverter2"
+        },
+        "readfile221": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Model File",
+                "x": 1630.9999914169312,
+                "y": 372,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "dynamicConnection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    }
+                }
+            },
+            "name": "readfile22"
+        },
+        "writefile131": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Save the Model File",
+                "x": 1445.9999923706055,
+                "y": 387,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_SU_MLModel",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile13"
+        },
+        "tofile131": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 1199.4999933242798,
+                "y": 552,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile13"
+        },
+        "13multiplexer1": {
+            "component": "com.sap.system.multiplexer.1-3",
+            "metadata": {
+                "label": "1:3 Multiplexer",
+                "x": 1911.9999904632568,
+                "y": 747.4999997615814,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "tofile3111": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 707,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile311"
+        },
+        "writefile2111": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write Supply Network File",
+                "x": 1164.9999933242798,
+                "y": 762,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_PR_SupplyNetwork",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile211"
+        },
+        "readfile23": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Supply Network File",
+                "x": 1445.9999923706055,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "readfile2"
+        },
+        "toblobconverter111": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1665.4999914169312,
+                "y": 702,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "toblobconverter11"
+        },
+        "writefile2112": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write Supply Network File",
+                "x": 1164.9999933242798,
+                "y": 882,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_SU_SupplyNetwork",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile211"
+        },
+        "readfile24": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Supply Network File",
+                "x": 1445.9999923706055,
+                "y": 747,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "readfile2"
+        },
+        "toblobconverter112": {
+            "component": "com.sap.util.toBlobConverter",
+            "metadata": {
+                "label": "ToBlob Converter",
+                "x": 1665.4999914169312,
+                "y": 792,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "toblobconverter11"
+        },
+        "tofile3112": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 797,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile311"
+        },
+        "tofile1111": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 2842.999984741211,
+                "y": 642,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile111"
+        },
+        "writefile1111": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write Predictions",
+                "x": 2941.999984741211,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_Prediction",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile111"
+        },
+        "readfile25": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Predictions",
+                "x": 3126.9999837875366,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "readfile2"
+        },
+        "tofile123": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 887,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile12"
+        },
+        "writefile123": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write the StatsFile",
+                "x": 1164.9999933242798,
+                "y": 1002,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_TRStats",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile12"
+        },
+        "readfile212": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Metrics File",
+                "x": 1445.9999923706055,
+                "y": 867,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "dynamicConnection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    }
+                }
+            },
+            "name": "readfile21"
+        },
+        "wiretap42": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1630.9999914169312,
+                "y": 882,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            },
+            "name": "wiretap4"
+        },
+        "constantgenerator11111": {
+            "component": "com.sap.util.constantGenerator",
+            "metadata": {
+                "label": "Set SQL Select for SC Events",
+                "x": 17,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "content": "select DOCID,ITID,LOCID,PRDID,OTIME,TYP from sapemp.sceventv",
+                    "counter": 0
+                }
+            },
+            "name": "constantgenerator1111"
+        },
+        "saphanaclient11111": {
+            "component": "com.sap.hana.client2",
+            "metadata": {
+                "label": "Read SC Event Data",
+                "x": 201.99999904632568,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "Configuration Manager",
+                        "connectionID": "HANA4IBP",
+                        "connectionProperties": {
+                            "additionalHosts": [],
+                            "host": "host",
+                            "password": "",
+                            "port": 9000,
+                            "proxyHost": "",
+                            "proxyPassword": "",
+                            "proxyPort": 1080,
+                            "proxyUser": "",
+                            "useTLS": false,
+                            "user": ""
+                        }
+                    }
+                }
+            },
+            "name": "saphanaclient1111"
+        },
+        "tofile1231": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 977,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile123"
+        },
+        "writefile1231": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write the StatsFile",
+                "x": 1164.9999933242798,
+                "y": 1122,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_PRStats",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile123"
+        },
+        "readfile2121": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Metrics File",
+                "x": 1445.9999923706055,
+                "y": 987,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "dynamicConnection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    }
+                }
+            },
+            "name": "readfile212"
+        },
+        "wiretap421": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1630.9999914169312,
+                "y": 1002,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            },
+            "name": "wiretap42"
+        },
+        "tofile1232": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 882.4999952316284,
+                "y": 1067,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile123"
+        },
+        "writefile1232": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write the StatsFile",
+                "x": 1164.9999933242798,
+                "y": 1242,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    },
+                    "mode": "Overwrite",
+                    "path": "SNI_SUStats",
+                    "pathMode": "Static (from configuration)"
+                }
+            },
+            "name": "writefile123"
+        },
+        "readfile2122": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read Metrics File",
+                "x": 1445.9999923706055,
+                "y": 1107,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "dynamicConnection": {
+                        "configurationType": "System Management Files (\"/files/\")",
+                        "vrepRoot": "/files/"
+                    }
+                }
+            },
+            "name": "readfile212"
+        },
+        "wiretap422": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1630.9999914169312,
+                "y": 1122,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            },
+            "name": "wiretap42"
+        },
+        "wiretap12": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 3820.9999809265137,
+                "y": 627,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            },
+            "name": "wiretap1"
+        }
+    },
+    "groups": [
+        {
+            "name": "group7",
+            "nodes": [
+                "python3operator21111",
+                "python3operator2111",
+                "python3operator211"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "sni": ""
+            }
+        },
+        {
+            "name": "group31",
+            "nodes": [
+                "python3operator423",
+                "python3operator4211",
+                "python3operator4221"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "sni": ""
+            }
+        },
+        {
+            "name": "group11",
+            "nodes": [
+                "python3operator11"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "sni": ""
+            }
+        },
+        {
+            "name": "group12",
+            "nodes": [
+                "python3operator1111"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "sni": ""
+            }
+        }
+    ],
+    "connections": [
+        {
+            "metadata": {
+                "points": "936.4999952316284,642 1083.999993801117,642 1083.999993801117,682 1159.9999933242798,682"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile311"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile211"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,414 991.9999947547913,414 991.9999947547913,410.5 1131.999993801117,410.5 1131.999993801117,376 1194.4999933242798,376"
+            },
+            "src": {
+                "port": "model",
+                "process": "python3operator211"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile121"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1253.4999933242798,367 1316.9999928474426,367 1316.9999928474426,307 1440.9999923706055,307"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile121"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile121"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,298 1597.9999918937683,298 1597.9999918937683,292 1625.9999914169312,292"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile121"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,673 1332.9999928474426,673 1332.9999928474426,547 1440.9999923706055,547"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile211"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,294 991.9999947547913,294 991.9999947547913,388.5 1099.999993801117,388.5 1099.999993801117,166 1194.4999933242798,166"
+            },
+            "src": {
+                "port": "model",
+                "process": "python3operator2111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile13"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1253.4999933242798,157 1316.9999928474426,157 1316.9999928474426,187 1440.9999923706055,187"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile13"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile13"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,178 1597.9999918937683,178 1597.9999918937683,172 1625.9999914169312,172"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile13"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile22"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,538 1597.9999918937683,538 1597.9999918937683,517 1660.4999914169312,517"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile2"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1754.9999914169312,163 1878.999990940094,163 1878.999990940094,485.50000071525574 1941.4999904632568,485.50000071525574"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile22"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1754.9999914169312,283 1862.999990940094,283 1862.999990940094,575.5000007152557 1941.4999904632568,575.5000007152557"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile1"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,534 1007.9999947547913,534 1007.9999947547913,432.5 1083.999993801117,432.5 1083.999993801117,586 1194.4999933242798,586"
+            },
+            "src": {
+                "port": "model",
+                "process": "python3operator21111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile131"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1253.4999933242798,577 1316.9999928474426,577 1316.9999928474426,427 1440.9999923706055,427"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile131"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile131"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,418 1597.9999918937683,418 1597.9999918937683,412 1625.9999914169312,412"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile131"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile221"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1754.9999914169312,403 1846.999990940094,403 1846.999990940094,665.5000007152557 1941.4999904632568,665.5000007152557"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile221"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter21"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1754.9999914169312,622 1814.999990940094,622 1814.999990940094,787.4999997615814 1906.9999904632568,787.4999997615814"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator21"
+            },
+            "tgt": {
+                "port": "in1",
+                "process": "13multiplexer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "936.4999952316284,822 1131.999993801117,822 1131.999993801117,922 1159.9999933242798,922"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile3112"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile2112"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,913 1364.9999928474426,913 1364.9999928474426,787 1440.9999923706055,787"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile2112"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile24"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,778 1597.9999918937683,778 1597.9999918937683,817 1660.4999914169312,817"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile24"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter112"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,658 1597.9999918937683,658 1597.9999918937683,727 1660.4999914169312,727"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile23"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "toblobconverter111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,793 1348.9999928474426,793 1348.9999928474426,667 1440.9999923706055,667"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile2111"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile23"
+            }
+        },
+        {
+            "metadata": {
+                "points": "936.4999952316284,732 1083.999993801117,732 1083.999993801117,802 1159.9999933242798,802"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile3111"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile2111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2896.999984741211,667 2936.999984741211,667"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile1111"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile1111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "3065.999984741211,658 3093.999984264374,658 3093.999984264374,667 3121.9999837875366,667"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile1111"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile25"
+            }
+        },
+        {
+            "metadata": {
+                "points": "936.4999952316284,912 1115.999993801117,912 1115.999993801117,1042 1159.9999933242798,1042"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile123"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile123"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,1033 1380.9999928474426,1033 1380.9999928474426,907 1440.9999923706055,907"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile123"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile212"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,898 1597.9999918937683,898 1597.9999918937683,922 1625.9999914169312,922"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile212"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap42"
+            }
+        },
+        {
+            "metadata": {
+                "points": "141,667 168.99999952316284,667 168.99999952316284,658 196.99999904632568,658"
+            },
+            "src": {
+                "port": "out",
+                "process": "constantgenerator11111"
+            },
+            "tgt": {
+                "port": "sql",
+                "process": "saphanaclient11111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,276 1007.9999947547913,276 1007.9999947547913,377.5 1083.999993801117,377.5 1083.999993801117,52 1159.9999933242798,52"
+            },
+            "src": {
+                "port": "MLResult",
+                "process": "python3operator2111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap4"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,396 991.9999947547913,396 991.9999947547913,399.5 1115.999993801117,399.5 1115.999993801117,262 1159.9999933242798,262"
+            },
+            "src": {
+                "port": "MLResult",
+                "process": "python3operator211"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap3"
+            }
+        },
+        {
+            "metadata": {
+                "points": "963.9999952316284,516 991.9999947547913,516 991.9999947547913,421.5 1099.999993801117,421.5 1099.999993801117,472 1159.9999933242798,472"
+            },
+            "src": {
+                "port": "MLResult",
+                "process": "python3operator21111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap41"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2035.9999904632568,769.4999997615814 2079.9999899864197,769.4999997615814 2079.9999899864197,642 2235.9999890327454,642 2235.9999890327454,555 2279.999988555908,555"
+            },
+            "src": {
+                "port": "out1",
+                "process": "13multiplexer1"
+            },
+            "tgt": {
+                "port": "days",
+                "process": "python3operator423"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2035.9999904632568,787.4999997615814 2111.9999899864197,787.4999997615814 2111.9999899864197,708 2235.9999890327454,708 2235.9999890327454,795 2279.999988555908,795"
+            },
+            "src": {
+                "port": "out2",
+                "process": "13multiplexer1"
+            },
+            "tgt": {
+                "port": "days",
+                "process": "python3operator4211"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2035.9999904632568,805.4999997615814 2095.9999899864197,805.4999997615814 2095.9999899864197,675 2279.999988555908,675"
+            },
+            "src": {
+                "port": "out3",
+                "process": "13multiplexer1"
+            },
+            "tgt": {
+                "port": "days",
+                "process": "python3operator4221"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2000.4999904632568,485.50000071525574 2143.9999899864197,485.50000071525574 2143.9999899864197,697 2251.9999890327454,697 2251.9999890327454,777 2279.999988555908,777"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter2"
+            },
+            "tgt": {
+                "port": "model",
+                "process": "python3operator4211"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2000.4999904632568,575.5000007152557 2063.9999899864197,575.5000007152557 2063.9999899864197,631 2219.9999890327454,631 2219.9999890327454,537 2279.999988555908,537"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter1"
+            },
+            "tgt": {
+                "port": "model",
+                "process": "python3operator423"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2000.4999904632568,665.5000007152557 2095.9999899864197,665.5000007152557 2095.9999899864197,664 2219.9999890327454,664 2219.9999890327454,657 2279.999988555908,657"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter21"
+            },
+            "tgt": {
+                "port": "model",
+                "process": "python3operator4221"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1719.4999914169312,517 1830.999990940094,517 1830.999990940094,718.5000002384186 2063.9999899864197,718.5000002384186 2063.9999899864197,653 2251.9999890327454,653 2251.9999890327454,573 2279.999988555908,573"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter11"
+            },
+            "tgt": {
+                "port": "supplynetwork",
+                "process": "python3operator423"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1719.4999914169312,727 1798.999990940094,727 1798.999990940094,855.4999992847443 2143.9999899864197,855.4999992847443 2143.9999899864197,719 2219.9999890327454,719 2219.9999890327454,813 2279.999988555908,813"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter111"
+            },
+            "tgt": {
+                "port": "supplynetwork",
+                "process": "python3operator4211"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1719.4999914169312,817 1782.999990940094,817 1782.999990940094,872.4999992847443 2127.9999899864197,872.4999992847443 2127.9999899864197,686 2219.9999890327454,686 2219.9999890327454,693 2279.999988555908,693"
+            },
+            "src": {
+                "port": "outbytearray",
+                "process": "toblobconverter112"
+            },
+            "tgt": {
+                "port": "supplynetwork",
+                "process": "python3operator4221"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2408.999988555908,555 2436.999988079071,555 2436.999988079071,664 2604.9999861717224,664 2604.9999861717224,657 2632.9999856948853,657"
+            },
+            "src": {
+                "port": "prediction",
+                "process": "python3operator423"
+            },
+            "tgt": {
+                "port": "TRPrediction",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2408.999988555908,675 2528.9999871253967,675 2528.9999871253967,686 2604.9999861717224,686 2604.9999861717224,693 2632.9999856948853,693"
+            },
+            "src": {
+                "port": "prediction",
+                "process": "python3operator4221"
+            },
+            "tgt": {
+                "port": "SUPrediction",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2408.999988555908,795 2436.999988079071,795 2436.999988079071,686 2512.9999871253967,686 2512.9999871253967,675 2632.9999856948853,675"
+            },
+            "src": {
+                "port": "prediction",
+                "process": "python3operator4211"
+            },
+            "tgt": {
+                "port": "PRPrediction",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "2761.9999856948853,675 2809.999985218048,675 2809.999985218048,676 2837.999984741211,676"
+            },
+            "src": {
+                "port": "prediction",
+                "process": "python3operator11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "325.9999990463257,667 353.9999985694885,667 353.9999985694885,675 401.99999809265137,675"
+            },
+            "src": {
+                "port": "result",
+                "process": "saphanaclient11111"
+            },
+            "tgt": {
+                "port": "MMove",
+                "process": "python3operator1111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,603 590.9999976158142,603 590.9999976158142,631 666.9999966621399,631 666.9999966621399,405 834.9999952316284,405"
+            },
+            "src": {
+                "port": "Transport",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "EventLink",
+                "process": "python3operator211"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,621 574.9999976158142,621 574.9999976158142,642 682.9999966621399,642 682.9999966621399,394 806.9999957084656,394 806.9999957084656,285 834.9999952316284,285"
+            },
+            "src": {
+                "port": "Production",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "EventLink",
+                "process": "python3operator2111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,639 558.9999976158142,639 558.9999976158142,653 698.9999966621399,653 698.9999966621399,416 806.9999957084656,416 806.9999957084656,525 834.9999952316284,525"
+            },
+            "src": {
+                "port": "Supplier",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "EventLink",
+                "process": "python3operator21111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,657 558.9999976158142,657 558.9999976158142,664 714.9999966621399,664 714.9999966621399,651 877.4999952316284,651"
+            },
+            "src": {
+                "port": "SNTransportation",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile311"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,675 730.9999966621399,675 730.9999966621399,741 877.4999952316284,741"
+            },
+            "src": {
+                "port": "SNProduction",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile3111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,693 558.9999976158142,693 558.9999976158142,686 714.9999966621399,686 714.9999966621399,831 877.4999952316284,831"
+            },
+            "src": {
+                "port": "SNSupplier",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile3112"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,711 558.9999976158142,711 558.9999976158142,697 698.9999966621399,697 698.9999966621399,921 877.4999952316284,921"
+            },
+            "src": {
+                "port": "TRStats",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile123"
+            }
+        },
+        {
+            "metadata": {
+                "points": "936.4999952316284,1002 1099.999993801117,1002 1099.999993801117,1162 1159.9999933242798,1162"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile1231"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile1231"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,1153 1396.9999928474426,1153 1396.9999928474426,1027 1440.9999923706055,1027"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile1231"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile2121"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,1018 1597.9999918937683,1018 1597.9999918937683,1042 1625.9999914169312,1042"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile2121"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap421"
+            }
+        },
+        {
+            "metadata": {
+                "points": "936.4999952316284,1092 1083.999993801117,1092 1083.999993801117,1282 1159.9999933242798,1282"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile1232"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile1232"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1288.9999933242798,1273 1412.9999928474426,1273 1412.9999928474426,1147 1440.9999923706055,1147"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile1232"
+            },
+            "tgt": {
+                "port": "ref",
+                "process": "readfile2122"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1569.9999923706055,1138 1597.9999918937683,1138 1597.9999918937683,1162 1625.9999914169312,1162"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile2122"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap422"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,729 574.9999976158142,729 574.9999976158142,708 682.9999966621399,708 682.9999966621399,1011 877.4999952316284,1011"
+            },
+            "src": {
+                "port": "PRStats",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1231"
+            }
+        },
+        {
+            "metadata": {
+                "points": "530.9999980926514,747 590.9999976158142,747 590.9999976158142,719 666.9999966621399,719 666.9999966621399,1101 877.4999952316284,1101"
+            },
+            "src": {
+                "port": "SUStats",
+                "process": "python3operator1111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1232"
+            }
+        },
+        {
+            "metadata": {
+                "points": "3250.9999837875366,658 3533.5,658 3533.5,667 3815.9999809265137,667"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile25"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap12"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {}
+}
